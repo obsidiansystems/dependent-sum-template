@@ -25,7 +25,7 @@ instance DeriveGShow Name where
             _ -> fail "deriveGShow: the name of a type constructor is required"
 
 instance DeriveGShow Dec where
-    deriveGShow = deriveForDec ''GShow (\t -> [t| GShow $t |]) $ \_ -> gshowFunction
+    deriveGShow = deriveForDec ''GShow (\t -> [t| GShow $t |]) gshowFunction
 
 instance DeriveGShow t => DeriveGShow [t] where
     deriveGShow [it] = deriveGShow it
@@ -34,11 +34,13 @@ instance DeriveGShow t => DeriveGShow [t] where
 instance DeriveGShow t => DeriveGShow (Q t) where
     deriveGShow = (>>= deriveGShow)
 
-gshowFunction = funD 'gshowsPrec . map gshowClause
+gshowFunction bndrs cons = funD 'gshowsPrec $ gshowClause bndrs <$> cons
 
-gshowClause con = do
+gshowClause bndrs con = do
     let conName  = nameOfCon con
         argTypes = argTypesOfCon con
+        needsGShow argType = any ((`occursInType` argType) . nameOfBinder) (bndrs ++ varsBoundInCon con)
+
         nArgs    = length argTypes
 
         precName = mkName "p"
@@ -49,20 +51,22 @@ gshowClause con = do
           then wildP
           else varP precName
 
-    clause [precPat, conP conName (map varP argNames)]
-        (normalB (gshowBody (varE precName) conName argNames)) []
+        showsName name = [| showString $(litE . stringL $ nameBase name) |]
 
-showsName name = [| showString $(litE . stringL $ nameBase name) |]
+        gshowBody = composeExprs $ intersperse [| showChar ' ' |]
+            $ showsName conName
+            : [ if needsGShow argType
+                   then [| gshowsPrec 11 $arg |]
+                   else [| showsPrec 11 $arg |]
+              | (argName, argType) <- zip argNames argTypes
+              , let arg = varE argName
+              ]
 
-gshowBody prec conName [] = showsName conName
-gshowBody prec conName argNames =
-    [| showParen ($prec > 10) $( composeExprs $ intersperse [| showChar ' ' |]
-        ( showsName conName
-        : [ [| showsPrec 11 $arg |]
-          | argName <- argNames, let arg = varE argName
-          ]
-        ))
-     |]
+        gshowBody' = case argNames of
+          [] -> gshowBody
+          _ -> [| showParen ($(varE precName) > 10) $gshowBody |]
+
+    clause [precPat, conP conName (map varP argNames)] (normalB gshowBody') []
 
 -- A type class purely for overloading purposes
 class DeriveShowTagIdentity t where
