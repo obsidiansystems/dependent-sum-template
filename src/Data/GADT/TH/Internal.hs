@@ -8,7 +8,7 @@
 {-# LANGUAGE TypeOperators #-}
 
 -- | Shared functions for dependent-sum-template
-module Data.Dependent.Sum.TH.Internal where
+module Data.GADT.TH.Internal where
 
 import Control.Monad
 import Control.Monad.Writer
