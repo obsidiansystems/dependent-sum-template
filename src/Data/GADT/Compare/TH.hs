@@ -77,10 +77,12 @@ geqClause paramVars con = do
     case t of
       AppT tyFun tyArg | needsGEq t -> do
         u <- lift $ reifyInstancesWithRigids paramVars ''GEq [tyFun]
+        let commonF = "found for GEq (" ++ show (ppr tyFun) ++ "), and unsure what to do. Please report this."
         case u of
           [] -> tell [AppT (ConT ''GEq) tyFun]
           [(InstanceD _ cxt _ _)] -> tell cxt
-          _ -> fail $ "More than one instance found for GEq (" ++ show (ppr tyFun) ++ "), and unsure what to do. Please report this."
+          [_] -> fail $ "Something unexpected " ++ commonF
+          (_ : _ : _) -> fail $ "More than one instance " ++ commonF
         lift $ bindS (conP 'Refl []) [| geq $(varE l) $(varE r) |]
       _ -> lift $ noBindS [| guard ($(varE l) == $(varE r)) |]
   ret <- lift $ noBindS [| return Refl |]
@@ -141,10 +143,12 @@ gcompareClauses paramVars con = do
     case argType of
       AppT tyFun tyArg | needsGCompare argType -> do
         u <- lift $ reifyInstancesWithRigids paramVars ''GCompare [tyFun]
+        let commonF = "found for commonF (" ++ show (ppr tyFun) ++ "), and unsure what to do. Please report this."
         case u of
           [] -> tell [AppT (ConT ''GCompare) tyFun]
           [(InstanceD _ cxt _ _)] -> tell cxt -- this might not be enough, may want to do full instance resolution.
-          _ -> fail $ "More than one instance of GCompare (" ++ show (ppr tyFun) ++ ") found, and unsure what to do. Please report this."
+          [_] -> fail $ "Something unexpected " ++ commonF
+          (_ : _ : _) -> fail $ "More than one instance " ++ commonF
         lift $ bindS (conP 'Refl []) [| geq' $(varE lArg) $(varE rArg) |]
       _ -> lift $ noBindS [| compare' $(varE lArg) $(varE rArg) |]
 
