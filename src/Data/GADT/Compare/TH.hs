@@ -86,8 +86,8 @@ geqClause paramVars con = do
   ret <- lift $ noBindS [| return Refl |]
 
   return $ Clause
-    [ ConP conName (map VarP lArgNames)
-    , ConP conName (map VarP rArgNames) ]
+    [ conPCompat conName (map VarP lArgNames)
+    , conPCompat conName (map VarP rArgNames) ]
     ( NormalB (doUnqualifiedE (stmts ++ [ret])))
     []
 
@@ -151,8 +151,8 @@ gcompareClauses paramVars con = do
   ret <- lift $ noBindS [| return GEQ |]
 
   let main = Clause
-        [ ConP conName (map VarP lArgNames)
-        , ConP conName (map VarP rArgNames) ]
+        [ conPCompat conName (map VarP lArgNames)
+        , conPCompat conName (map VarP rArgNames) ]
         ( NormalB (AppE (VarE 'runGComparing) (doUnqualifiedE (stmts ++ [ret]))))
         []
       lt = Clause [RecP conName [], WildP] (NormalB (ConE 'GLT)) []
@@ -163,4 +163,12 @@ gcompareClauses paramVars con = do
 doUnqualifiedE = DoE Nothing
 #else
 doUnqualifiedE = DoE
+#endif
+
+conPCompat :: Name -> [Pat] -> Pat
+conPCompat name =
+  ConP
+    name
+#if MIN_VERSION_template_haskell(2, 18, 0)
+    []
 #endif
