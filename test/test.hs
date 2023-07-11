@@ -168,7 +168,7 @@ deriveGShow ''Spleeb
 
 data SpleebHard a b where
     PH :: a Double -> Qux b -> SpleebHard a b
-
+    PI :: a Int -> Foo b -> SpleebHard a b
 
 -- need a cleaner 'one-shot' way of defining these - the empty instances need to appear
 -- in the same quotation because the GEq context of the GCompare class causes stage
@@ -193,6 +193,7 @@ instance GShow a => Show (SpleebHard a b) where showsPrec = gshowsPrec
 
 data SpleebHard2 a b where
     PH2 :: a Double -> Qux b -> SpleebHard2 a b
+    PI2 :: a Int -> Foo b -> SpleebHard2 a b
 
 deriveGEq ''SpleebHard2
 deriveGCompare ''SpleebHard2
