@@ -191,6 +191,13 @@ do
 
 instance GShow a => Show (SpleebHard a b) where showsPrec = gshowsPrec
 
+data SpleebHard2 a b where
+    PH2 :: a Double -> Qux b -> SpleebHard2 a b
+
+deriveGEq ''SpleebHard2
+deriveGCompare ''SpleebHard2
+deriveGShow ''SpleebHard2
+
 -- another option; start from the declaration and juggle that a bit
 do
     decs <- [d|
