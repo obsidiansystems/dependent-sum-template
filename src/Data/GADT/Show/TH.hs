@@ -6,7 +6,7 @@ module Data.GADT.Show.TH
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Writer
-import Data.Dependent.Sum.TH.Internal
+import Data.GADT.TH.Internal
 import Data.Functor.Identity
 import Data.GADT.Show
 import Data.Traversable (for)

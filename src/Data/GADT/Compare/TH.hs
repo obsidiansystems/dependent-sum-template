@@ -14,7 +14,7 @@ module Data.GADT.Compare.TH
 
 import Control.Monad
 import Control.Monad.Writer
-import Data.Dependent.Sum.TH.Internal
+import Data.GADT.TH.Internal
 import Data.Functor.Identity
 import Data.GADT.Compare
 import Data.GADT.Compare.Monad
