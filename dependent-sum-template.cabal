@@ -1,5 +1,5 @@
 name:                   dependent-sum-template
-version:                0.1.1.1
+version:                0.1.2.0
 stability:              experimental
 
 cabal-version:          >= 1.10
@@ -8,11 +8,11 @@ build-type:             Simple
 author:                 James Cook <mokus@deepbondi.net>
 maintainer:             Obsidian Systems, LLC <maintainer@obsidian.systems>
 license:                PublicDomain
-homepage:               https://github.com/obsidiansystems/dependent-sum
+homepage:               https://github.com/obsidiansystems/dependent-sum-template
 
 category:               Unclassified
-synopsis:               Template Haskell code to generate instances of classes in dependent-sum package
-description:            Template Haskell code to generate instances of classes in dependent-sum package, such as 'GEq' and 'GCompare'.
+synopsis:               Template Haskell code to generate instances of classes in some package
+description:            Template Haskell code to generate instances of classes in some package, such as 'GEq' and 'GCompare'.
 
 tested-with:            GHC == 8.0.2,
                         GHC == 8.2.2,
@@ -22,10 +22,11 @@ tested-with:            GHC == 8.0.2,
                         GHC == 9.0.1
 
 extra-source-files:     ChangeLog.md
+                      , ReadMe.md
 
 source-repository head
   type: git
-  location: https://github.com/obsidiansystems/dependent-sum
+  location: https://github.com/obsidiansystems/dependent-sum-template
 
 Library
   if impl(ghc < 7.10)
@@ -35,10 +36,12 @@ Library
   exposed-modules:      Data.GADT.Compare.TH
                         Data.GADT.Show.TH
   other-modules:        Data.Dependent.Sum.TH.Internal
+                        Data.GADT.Compare.Monad
   build-depends:        base >= 3 && <5,
-                        dependent-sum >= 0.4.1 && < 0.8,
+                        some >= 1.0.1 && < 1.1,
+                        containers >= 0.5.9.2,
+                        mtl,
                         template-haskell,
-                        th-extras >= 0.0.0.2,
                         th-abstraction >= 0.4
 
 test-suite test
@@ -50,5 +53,7 @@ test-suite test
   main-is: test.hs
   build-depends: base
                , constraints-extras
-               , dependent-sum
                , dependent-sum-template
+               , template-haskell
+               , some
+               , th-abstraction

@@ -1,5 +1,13 @@
 # Revision history for dependent-sum-template
 
+## 0.1.2.0 - 2023-07-11
+
+* Rework a lot of the logic using th-abstraction to get structural information about data types and to
+  normalize their representation. This should allow the deriving functions to work on a much wider range
+  of types.
+
+* Change dependency to just be on `some`, not `dependent-sum`, as we just need the reexported classes.
+
 ## 0.1.1.1 - 2021-12-30
 
 * Fix warning with GHC 9.2 about non-canonical `return`.
