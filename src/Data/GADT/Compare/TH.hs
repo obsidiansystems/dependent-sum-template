@@ -85,10 +85,12 @@ geqClause paramVars con = do
       _ -> lift $ noBindS [| guard ($(varE l) == $(varE r)) |]
   ret <- lift $ noBindS [| return Refl |]
 
-  return $ Clause
-    [ ConP conName (map VarP lArgNames)
-    , ConP conName (map VarP rArgNames) ]
-    ( NormalB (doUnqualifiedE (stmts ++ [ret])))
+  pats <- lift $ sequence
+    [ conP conName (map varP lArgNames)
+    , conP conName (map varP rArgNames)
+    ]
+  pure $ Clause pats
+    (NormalB (doUnqualifiedE (stmts ++ [ret])))
     []
 
 class DeriveGCompare t where
@@ -150,10 +152,13 @@ gcompareClauses paramVars con = do
 
   ret <- lift $ noBindS [| return GEQ |]
 
-  let main = Clause
-        [ ConP conName (map VarP lArgNames)
-        , ConP conName (map VarP rArgNames) ]
-        ( NormalB (AppE (VarE 'runGComparing) (doUnqualifiedE (stmts ++ [ret]))))
+
+  pats <- lift $ sequence
+        [ conP conName (map varP lArgNames)
+        , conP conName (map varP rArgNames)
+        ]
+  let main = Clause pats
+        (NormalB (AppE (VarE 'runGComparing) (doUnqualifiedE (stmts ++ [ret]))))
         []
       lt = Clause [RecP conName [], WildP] (NormalB (ConE 'GLT)) []
       gt = Clause [WildP, RecP conName []] (NormalB (ConE 'GGT)) []

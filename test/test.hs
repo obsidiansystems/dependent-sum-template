@@ -180,7 +180,7 @@ do
         [d|
             instance GEq a => GEq (SpleebHard a)
             instance GCompare a => GCompare (SpleebHard a)
-            instance GShow a => GShow (SpleebHard a)
+            instance (Show (a Double), Show (a Int), GShow Qux, GShow Foo) => GShow (SpleebHard a)
           |]
 
     concat <$> sequence
@@ -189,7 +189,7 @@ do
         , deriveGShow    gshowInst
         ]
 
-instance GShow a => Show (SpleebHard a b) where showsPrec = gshowsPrec
+instance (Show (a Double), Show (a Int), GShow Qux, GShow Foo) => Show (SpleebHard a b) where showsPrec = gshowsPrec
 
 data SpleebHard2 a b where
     PH2 :: a Double -> Qux b -> SpleebHard2 a b

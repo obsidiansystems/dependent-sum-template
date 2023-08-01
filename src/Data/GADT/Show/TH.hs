@@ -66,24 +66,16 @@ gshowClause typeName paramVars con = do
 
   argShowExprs <- forM (zip argNames argTypes) $ \(n,t) -> do
     let useShow = do
-          tell [AppT (ConT ''Show) t]
+          u <- lift $ reifyInstancesWithRigids paramVars ''Show [t]
+          case u of
+            (_:_) -> return ()
+            _ -> tell [AppT (ConT ''Show) t]
           return [| showsPrec 11 $(varE n) |]
     case t of
       AppT tyFun tyArg -> do
-        let useGShow = do
-              tell [AppT (ConT ''GShow) tyFun]
-              return [| gshowsPrec 11 $(varE n) |]
         if isApplicationOf (ConT typeName) tyFun
           then return [| gshowsPrec 11 $(varE n) |]
-          else do
-            v <- lift $ reifyInstancesWithRigids paramVars ''GShow [tyFun]
-            case v of
-              (_:_) -> useGShow
-              _ -> do
-                u <- lift $ reifyInstancesWithRigids paramVars ''Show [t]
-                case u of
-                  (_:_) -> useShow
-                  [] -> useGShow
+          else useShow
       _ -> useShow
 
   let precPat = if null argNames

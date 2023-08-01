@@ -6,12 +6,14 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE DataKinds #-}
 
 -- | Shared functions for dependent-sum-template
 module Data.GADT.TH.Internal where
 
 import Control.Monad
 import Control.Monad.Writer
+import qualified Data.Kind
 import Data.List (foldl', drop)
 import Data.Maybe
 import Data.Map (Map)
@@ -35,7 +37,10 @@ classHeadToParams t = (h, reverse reversedParams)
       _ -> (headOfType t, [])
 
 -- Do not export this type family, it must remain empty. It's used as a way to trick GHC into not unifying certain type variables.
-type family Skolem :: k -> k
+type family Skolem :: Data.Kind.Type -> k -> k
+
+-- Do not export this type. It's part of the skolem trick above.
+data Unknown = Unknown
 
 skolemize :: Set Name -> Type -> Type
 skolemize rigids t = case t of
@@ -43,15 +48,28 @@ skolemize rigids t = case t of
   AppT t1 t2 -> AppT (skolemize rigids t1) (skolemize rigids t2)
   SigT t k -> SigT (skolemize rigids t) k
   VarT v -> if Set.member v rigids
-    then AppT (ConT ''Skolem) (VarT v)
+    then AppT (AppT (ConT ''Skolem) (ConT ''Unknown)) (VarT v)
     else t
   InfixT t1 n t2 -> InfixT (skolemize rigids t1) n (skolemize rigids t2)
   UInfixT t1 n t2 -> UInfixT (skolemize rigids t1) n (skolemize rigids t2)
   ParensT t -> ParensT (skolemize rigids t)
   _ -> t
 
+reifyInstancesBroken :: Q Bool
+reifyInstancesBroken = do
+  a <- newName "a"
+  ins <- reifyInstancesWithRigids' (Set.singleton a) ''Show [VarT a]
+  pure $ not $ null ins
+
+reifyInstancesWithRigids' :: Set Name -> Name -> [Type] -> Q [InstanceDec]
+reifyInstancesWithRigids' rigids cls tys = reifyInstances cls (map (skolemize rigids) tys)
+
 reifyInstancesWithRigids :: Set Name -> Name -> [Type] -> Q [InstanceDec]
-reifyInstancesWithRigids rigids cls tys = reifyInstances cls (map (skolemize rigids) tys)
+reifyInstancesWithRigids rigids cls tys = do
+  isBroken <- reifyInstancesBroken
+  if isBroken
+    then fail "Unsupported GHC version: 'reifyInstances' in this version of GHC returns instances when we expect an empty list. See https://gitlab.haskell.org/ghc/ghc/-/issues/23743"
+    else reifyInstancesWithRigids' rigids cls tys
 
 -- | Determine the type variables which occur freely in a type.
 freeTypeVariables :: Type -> Set Name
