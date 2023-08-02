@@ -37,10 +37,7 @@ classHeadToParams t = (h, reverse reversedParams)
       _ -> (headOfType t, [])
 
 -- Do not export this type family, it must remain empty. It's used as a way to trick GHC into not unifying certain type variables.
-type family Skolem :: Data.Kind.Type -> k -> k
-
--- Do not export this type. It's part of the skolem trick above.
-data Unknown = Unknown
+type family Skolem :: k -> k
 
 skolemize :: Set Name -> Type -> Type
 skolemize rigids t = case t of
@@ -48,7 +45,7 @@ skolemize rigids t = case t of
   AppT t1 t2 -> AppT (skolemize rigids t1) (skolemize rigids t2)
   SigT t k -> SigT (skolemize rigids t) k
   VarT v -> if Set.member v rigids
-    then AppT (AppT (ConT ''Skolem) (ConT ''Unknown)) (VarT v)
+    then AppT (ConT ''Skolem) (VarT v)
     else t
   InfixT t1 n t2 -> InfixT (skolemize rigids t1) n (skolemize rigids t2)
   UInfixT t1 n t2 -> UInfixT (skolemize rigids t1) n (skolemize rigids t2)
