@@ -1,5 +1,5 @@
 name:                   dependent-sum-template
-version:                0.1.2.0
+version:                0.2.0.0
 stability:              experimental
 
 cabal-version:          >= 1.10
@@ -14,12 +14,12 @@ category:               Unclassified
 synopsis:               Template Haskell code to generate instances of classes in some package
 description:            Template Haskell code to generate instances of classes in some package, such as 'GEq' and 'GCompare'.
 
-tested-with:            GHC == 8.0.2,
-                        GHC == 8.2.2,
-                        GHC == 8.4.4,
+tested-with:            GHC == 8.4.4,
                         GHC == 8.6.5,
-                        GHC == 8.8.3,
-                        GHC == 9.0.1
+                        GHC == 8.8.4,
+                        GHC == 8.10.7,
+                        GHC == 9.0.2,
+                        GHC == 9.6.1
 
 extra-source-files:     ChangeLog.md
                       , ReadMe.md
@@ -41,7 +41,7 @@ Library
                         some >= 1.0.1 && < 1.1,
                         containers >= 0.5.9.2,
                         mtl,
-                        template-haskell,
+                        template-haskell >= 2.11 && < 2.21,
                         th-abstraction >= 0.4
 
 test-suite test
