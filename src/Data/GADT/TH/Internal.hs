@@ -6,14 +6,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE DataKinds #-}
 
 -- | Shared functions for dependent-sum-template
 module Data.GADT.TH.Internal where
 
 import Control.Monad
 import Control.Monad.Writer
-import qualified Data.Kind
 import Data.List (foldl', drop)
 import Data.Maybe
 import Data.Map (Map)
@@ -36,8 +34,8 @@ classHeadToParams t = (h, reverse reversedParams)
         in (h, x : reversedParams)
       _ -> (headOfType t, [])
 
--- Do not export this type family, it must remain empty. It's used as a way to trick GHC into not unifying certain type variables.
-type family Skolem :: k -> k
+-- Do not export this data family, it must remain empty. It's used as a way to trick GHC into not unifying certain type variables.
+data family Skolem :: k -> k
 
 skolemize :: Set Name -> Type -> Type
 skolemize rigids t = case t of
@@ -52,21 +50,8 @@ skolemize rigids t = case t of
   ParensT t -> ParensT (skolemize rigids t)
   _ -> t
 
-reifyInstancesBroken :: Q Bool
-reifyInstancesBroken = do
-  a <- newName "a"
-  ins <- reifyInstancesWithRigids' (Set.singleton a) ''Show [VarT a]
-  pure $ not $ null ins
-
-reifyInstancesWithRigids' :: Set Name -> Name -> [Type] -> Q [InstanceDec]
-reifyInstancesWithRigids' rigids cls tys = reifyInstances cls (map (skolemize rigids) tys)
-
 reifyInstancesWithRigids :: Set Name -> Name -> [Type] -> Q [InstanceDec]
-reifyInstancesWithRigids rigids cls tys = do
-  isBroken <- reifyInstancesBroken
-  if isBroken
-    then fail "Unsupported GHC version: 'reifyInstances' in this version of GHC returns instances when we expect an empty list. See https://gitlab.haskell.org/ghc/ghc/-/issues/23743"
-    else reifyInstancesWithRigids' rigids cls tys
+reifyInstancesWithRigids rigids cls tys = reifyInstances cls (map (skolemize rigids) tys)
 
 -- | Determine the type variables which occur freely in a type.
 freeTypeVariables :: Type -> Set Name
