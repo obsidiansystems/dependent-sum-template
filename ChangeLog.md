@@ -1,10 +1,16 @@
 # Revision history for dependent-sum-template
 
+## 0.2.0.1 - 2023-12-06
+
+* Add back support for GHC 9.2 and 9.4.
+
+  We were able to work around [the bug in `reifyInstances`](https://gitlab.haskell.org/ghc/ghc/-/issues/23743) by using a data family instead of a type family.
+
 ## 0.2.0.0 - 2023-08-01
 
 * Recover compatibility with template-haskell 2.18, which was lost in 0.1.2.0
 * deriveGShow will generate code that uses Show instances for every argument to a constructor, apart from those of the type that it is generating an instance for.
-* Drop support for GHC 9.2 and 9.4 due to [a bug in reifyInstances](https://gitlab.haskell.org/ghc/ghc/-/issues/23743)
+* Drop support for GHC 9.2 and 9.4 due to [a bug in `reifyInstances`](https://gitlab.haskell.org/ghc/ghc/-/issues/23743)
 
 ## 0.1.2.0 - 2023-07-11
 
