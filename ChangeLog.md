@@ -1,5 +1,10 @@
 # Revision history for dependent-sum-template
 
+## 0.2.0.2 - 2025-01-18
+
+* Support GHC 9.12
+
+
 ## 0.2.0.1 - 2023-12-06
 
 * Add back support for GHC 9.2 and 9.4.
