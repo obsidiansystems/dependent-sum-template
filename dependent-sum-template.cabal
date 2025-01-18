@@ -24,6 +24,7 @@ tested-with:            GHC == 8.4.4,
                         GHC == 9.6.1,
                         GHC == 9.8.2,
                         GHC == 9.10.1
+                        GHC == 9.12.1
 
 extra-source-files:     ChangeLog.md
                       , ReadMe.md
@@ -45,7 +46,7 @@ Library
                         some >= 1.0.1 && < 1.1,
                         containers >= 0.5.9.2,
                         mtl,
-                        template-haskell >= 2.11 && < 2.23,
+                        template-haskell >= 2.11 && < 2.24,
                         th-abstraction >= 0.4
 
 test-suite test
